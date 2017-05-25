@@ -1,3 +1,7 @@
+const dotenv = require('dotenv')
+dotenv.config()
+dotenv.load({ path: '../.env' })
+
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
@@ -10,3 +14,5 @@ client.on('message', message => {
     message.reply('pong')
   }
 })
+
+client.login(process.env.UNREAL_BOT_TOKEN)
