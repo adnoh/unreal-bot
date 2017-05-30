@@ -1,17 +1,20 @@
 const dotenv = require('dotenv')
 dotenv.config()
-dotenv.load({ path: '../.env' })
+dotenv.load({ path: './.env' })
 
 const Discord = require('discord.js')
 const client = new Discord.Client()
+
+const pingPong = require('./app/ping.js')
 
 client.on('ready', () => {
   console.log('I am ready!')
 })
 
 client.on('message', message => {
-  if (message.content === 'ping') {
-    message.reply('pong')
+  const pong = pingPong(message.content)
+  if (pong === 'pong') {
+    message.reply(pong)
   }
 })
 
