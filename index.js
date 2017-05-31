@@ -13,6 +13,7 @@ const streamOptions = { seek: 0, volume: 0.1 }
 
 const findInfiles = require('find-in-files')
 
+
 client.on('ready', () => {
   console.log('I am ready!')
 })
