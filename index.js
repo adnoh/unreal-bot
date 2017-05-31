@@ -5,7 +5,6 @@ dotenv.load({ path: './.env' })
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-<<<<<<< HEAD:app/index.js
 // YoutubeClient.setKey(process.env.YOUTUBE_TOKEN)
 
 const broadcast = client.createVoiceBroadcast()
@@ -13,9 +12,6 @@ const ytdl = require('ytdl-core')
 const streamOptions = { seek: 0, volume: 0.1 }
 
 const findInfiles = require('find-in-files')
-=======
-const pingPong = require('./app/ping.js')
->>>>>>> 147b9a74ecb087fb624633c897384b71e4cdb6ca:index.js
 
 client.on('ready', () => {
   console.log('I am ready!')
@@ -26,7 +22,6 @@ client.on('ready', () => {
   * Bot will reply 'pong' to the user.
   */
 client.on('message', message => {
-<<<<<<< HEAD:app/index.js
   if (message.content === '!ping') {
     message.reply('pong')
     message.delete(5000)
@@ -75,7 +70,7 @@ client.on('message', message => {
 client.on('message', message => {
   if (message.content === '!tet') {
     var searchTerm = 'OnActorHit'
-    findInfiles.find(searchTerm, '.', '.chm').then(function (results) {
+    findInfiles.find(searchTerm, '.', '.chm').then(function(results) {
       console.log('Tet acc')
       for (var result in results) {
         var res = results[result]
@@ -92,11 +87,6 @@ client.on('message', message => {
       }
       message.delete(5000)
     })
-=======
-  const pong = pingPong(message.content)
-  if (pong === 'pong') {
-    message.reply(pong)
->>>>>>> 147b9a74ecb087fb624633c897384b71e4cdb6ca:index.js
   }
 })
 
