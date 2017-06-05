@@ -44,17 +44,26 @@ const clientMessage$ = Rx.Observable
 const joinMessage$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'join')
 )
-general.joinChannel(joinMessage$)
+general.joinChannel(joinMessage$).subscribe(() => console.log('Joined Channel'))
 
 const leaveMessage$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'leave')
 )
-general.leaveChannel(leaveMessage$)
+general.leaveChannel(leaveMessage$).subscribe(voiceChannel => {
+  voiceChannel.leave()
+  console.log('Left Channel')
+})
 
 const clearChannel$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'clean')
 )
-general.clearChannel(clearChannel$)
+general
+  .clearChannel(clearChannel$)
+  .subscribe(
+    () => console.log('Channel Cleared'),
+    err => console.log(err),
+    null
+  )
 
 /** Game Commands
  * !ping: is replied with pong
@@ -64,12 +73,18 @@ const pingMessage$ = clientMessage$.filter(message =>
 )
 games.pingpong(pingMessage$)
 
-/** Media Commands 
+/** Media Commands
  * !youtube[SPACE]url: plays the requested song
   */
 const media$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'youtube')
 )
-media.play(media$, client)
+media
+  .play(media$, client, media.playYT)
+  .subscribe(
+    () => console.log('Started Playing: some song'),
+    () => console.log('error'),
+    () => console.log('completed')
+  )
 
 client.login(process.env.UNREAL_BOT_TOKEN)

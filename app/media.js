@@ -1,10 +1,8 @@
 const Rx = require('rxjs/Rx')
 const ytdl = require('ytdl-core')
-const searchYT = require('youtube-search')
+// TODO: const searchYT = require('youtube-search')
 
-exports.play = function(message$, client) {
-  const delayUntilEnd$ = new Rx.Subject()
-
+exports.play = function(message$, client, playYT) {
   const memberInVoiceChannel$ = message$.filter(
     message => message.guild.voiceConnection
   )
@@ -23,17 +21,12 @@ exports.play = function(message$, client) {
     playYT(connection, stream)
   )
 
-  dispatch$
+  return dispatch$
     .withLatestFrom(message$, (_, message) => message)
     .switchMap(message => message.delete())
-    .subscribe(
-      () => console.log('Started Playing: some song'),
-      () => console.log('error'),
-      () => console.log('completed')
-    )
 }
 
-function playYT(connection, stream) {
+exports.playYT = function(connection, stream) {
   const streamOptions = { seek: 0, volume: 0.25 }
 
   return Rx.Observable
