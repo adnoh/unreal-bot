@@ -67,9 +67,9 @@ games.pingpong(pingMessage$)
 /* Media Commands 
  * !youtube[SPACE]url: plays the requested song
   */
-//const media$ = clientMessage$.filter(message =>
-//  message.content.startsWith(prefix + 'youtube')
-//)
-//media.play(media$, client)
+const media$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'youtube')
+)
+media.play(media$, client)
 
 client.login(process.env.UNREAL_BOT_TOKEN)
