@@ -36,7 +36,7 @@ const clientMessage$ = Rx.Observable
   .share()
   .filter(message => message.content.startsWith(prefix))
 
-/* General Bot Commands
+/** General Bot Commands
    * !join: joins the bot in users the channel
    * !leave: leave channel
    * !clean: the whole botchannel is cleared
@@ -56,7 +56,7 @@ const clearChannel$ = clientMessage$.filter(message =>
 )
 general.clearChannel(clearChannel$)
 
-/* Game Commands
+/** Game Commands
  * !ping: is replied with pong
  */
 const pingMessage$ = clientMessage$.filter(message =>
@@ -64,7 +64,7 @@ const pingMessage$ = clientMessage$.filter(message =>
 )
 games.pingpong(pingMessage$)
 
-/* Media Commands 
+/** Media Commands 
  * !youtube[SPACE]url: plays the requested song
   */
 const media$ = clientMessage$.filter(message =>
