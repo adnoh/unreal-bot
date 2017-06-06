@@ -1,21 +1,33 @@
 const Rx = require('rxjs/Rx')
 const ytdl = require('ytdl-core')
-// TODO: const searchYT = require('youtube-search')
+const searchYT = require('youtube-search')
 
 exports.play = function(message$, client, playYT) {
   const memberInVoiceChannel$ = message$.filter(
     message => message.guild.voiceConnection
   )
-  const messageContent$ = memberInVoiceChannel$.map(message =>
-    message.content.split(' ')[1].trim()
-  )
 
-  const youtube$ = memberInVoiceChannel$
-    .map(message => message.guild.voiceConnection)
-    .withLatestFrom(messageContent$, (connection, link) => {
-      const stream = ytdl(link, { filter: 'audioonly', quality: '250' })
+  const messageContent$ = memberInVoiceChannel$.switchMap(message => {
+    const searchArgument = message.content.match(/(?!!youtube) (.*)/)[1]
+    if (searchArgument.includes('http')) {
+      return Rx.Observable.of(searchArgument)
+    } else {
+      const searchYT$ = Rx.Observable.bindNodeCallback(searchYT)
+      return searchYT$(searchArgument, {
+        maxResults: 1,
+        key: process.env.YOUTUBE_API_KEY
+      }).map(results => results[0].reduce((link, video) => video.link, ''))
+    }
+  })
+
+  const youtube$ = Rx.Observable.zip(
+    memberInVoiceChannel$.map(message => message.guild.voiceConnection),
+    messageContent$,
+    (connection, link) => {
+      const stream = ytdl(link, { filter: 'audioonly' })
       return { connection, stream }
-    })
+    }
+  )
 
   const dispatch$ = youtube$.switchMap(({ connection, stream }) =>
     playYT(connection, stream)

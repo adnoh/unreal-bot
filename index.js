@@ -83,7 +83,7 @@ media
   .play(media$, client, media.playYT)
   .subscribe(
     () => console.log('Started Playing: some song'),
-    () => console.log('error'),
+    err => console.log('error: ', err),
     () => console.log('completed')
   )
 
