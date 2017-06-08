@@ -1,7 +1,7 @@
 const Rx = require('rxjs/Rx')
 const games = require('../games.js')
 
-test('test', () => {
+test('failing test with marbles', done => {
   const test = new Rx.TestScheduler((actual, expected) =>
     expect(actual).toEqual(expected)
   )
@@ -17,4 +17,10 @@ test('test', () => {
 
   test.expectObservable(pingpong$).toBe(received$, values)
   test.flush()
+})
+
+test('pingpong should return an observable', () => {
+  const message$ = Rx.Observable.of(1)
+  expect.any(games.pingpong(message$).subscribe)
+})
 })
