@@ -1,6 +1,6 @@
 {
     "name": "unreal-bot",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Discord bot for fetching Unreal Engine Documentation",
     "main": "index.js",
     "repository": "https://github.com/rangelke/unreal-bot.git",
