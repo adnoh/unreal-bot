@@ -28,7 +28,7 @@ const media = require('./app/media.js')
 
 const prefix = '!'
 Rx.Observable.fromEvent(client, 'ready').subscribe(() => {
-  console.log(`Bot online: ${client.readyAt}`)
+  console.log(`Bot online: ${client.readyAt}.`)
 })
 
 const clientMessage$ = Rx.Observable
@@ -44,26 +44,36 @@ const clientMessage$ = Rx.Observable
 const joinMessage$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'join')
 )
-general.joinChannel(joinMessage$).subscribe(() => console.log('Joined Channel'))
+general.joinChannel(joinMessage$).subscribe(
+  message => {
+    message.delete().then(() => {
+      console.log('Bot has joined the channel.')
+    })
+  },
+  err => console.log('Bot failed to join channel: ', err)
+)
 
 const leaveMessage$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'leave')
 )
-general.leaveChannel(leaveMessage$).subscribe(voiceChannel => {
-  voiceChannel.leave()
-  console.log('Left Channel')
-})
+general.leaveChannel(leaveMessage$).subscribe(
+  voiceChannel => {
+    voiceChannel.leave()
+    console.log('Bot has left the channel.')
+  },
+  err => console.log('Bot failed to leave the channel: ', err)
+)
 
 const clearChannel$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'clean')
 )
-general
-  .clearChannel(clearChannel$)
-  .subscribe(
-    () => console.log('Channel Cleared'),
-    err => console.log(err),
-    null
-  )
+general.clearChannel(clearChannel$, 'bottestchannel').subscribe(
+  messages => {
+    messages.deleteAll()
+    console.log('Bot is clearing the channel.')
+  },
+  err => console.log('Bot failed to clear channel: ', err)
+)
 
 /** Game Commands
  * !ping: is replied with pong
@@ -73,10 +83,11 @@ const pingMessage$ = clientMessage$.filter(message =>
 )
 games.pingpong(pingMessage$).subscribe(
   message => {
-    message.delete(5000)
+    message.delete(5000).then(() => {
+      console.log('Bot has sent pong.')
+    })
   },
-  err => console.log(err),
-  null
+  err => console.log('Game Error (pingpong): ', err)
 )
 
 /** Media Commands
@@ -88,9 +99,8 @@ const media$ = clientMessage$.filter(message =>
 media
   .play(media$, client, media.playYT)
   .subscribe(
-    () => console.log('Started Playing: some song'),
-    err => console.log('error: ', err),
-    () => console.log('completed')
+    () => console.log('Bot started playing song: .'),
+    err => console.log('Media Error: ', err)
   )
 
 client.login(process.env.UNREAL_BOT_TOKEN)
