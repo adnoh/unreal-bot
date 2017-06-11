@@ -1,94 +1,106 @@
-const dotenv = require('dotenv')
-dotenv.config()
-dotenv.load({ path: './.env' })
+'use strict'
 
-const Discord = require('discord.js')
-const client = new Discord.Client()
+try {
+  var dotenv = require('dotenv')
+  dotenv.config()
+  dotenv.load({ path: './.env' })
 
-// YoutubeClient.setKey(process.env.YOUTUBE_TOKEN)
+  var Rx = require('rxjs/Rx')
+} catch (e) {
+  console.log(e.stack)
+  console.log(
+    'Install NPM, run npm install and add the .env file to setup TOKENS'
+  )
+  process.exit()
+}
 
-const broadcast = client.createVoiceBroadcast()
-const ytdl = require('ytdl-core')
-const streamOptions = { seek: 0, volume: 0.1 }
+try {
+  var Discord = require('discord.js')
+  var client = new Discord.Client()
+} catch (e) {
+  console.log('Error loading the discord bot')
+  process.exit()
+}
 
-const findInfiles = require('find-in-files')
+const games = require('./app/games.js')
+const general = require('./app/general.js')
+const media = require('./app/media.js')
 
-
-client.on('ready', () => {
-  console.log('I am ready!')
+const prefix = '!'
+Rx.Observable.fromEvent(client, 'ready').subscribe(() => {
+  console.log(`Bot online: ${client.readyAt}.`)
 })
 
-/* PongBot Code
-  * Use: !ping
-  * Bot will reply 'pong' to the user.
-  */
-client.on('message', message => {
-  if (message.content === '!ping') {
-    message.reply('pong')
-    message.delete(5000)
-  }
-})
+const clientMessage$ = Rx.Observable
+  .fromEvent(client, 'message')
+  .share()
+  .filter(message => message.content.startsWith(prefix))
 
-/*  MusicBot Code
-  * Use: !youtube + url
-  * Play's the audio of a youtube video in the voice channel of the user.
-  *
-  * Funcitons:
-  * !youtube + url  : play's audio from the youtube video
-  * !stop           : leaves the channel
-  *
-  * TODO make it possible to add stuff in a que and skip vids
-  *
-  */
-client.on('message', message => {
-  if (message.content.indexOf('!youtube') === 0) {
-    var youtubeURL = message.content.split(' ', 2)[1]
-    youtubeURL.trim()
-    message.delete(5000)
-    // Only try to join the sender's voice channel if they are in one themselves
-    if (message.member.voiceChannel) {
-      message.member.voiceChannel
-        .join()
-        .then(connection => {
-          // Connection is an instance of VoiceConnection
-          const stream = ytdl(youtubeURL, {
-            filter: 'audioonly'
-          })
-          const dispatcher = connection.playStream(stream, streamOptions)
-        })
-        .catch(console.log)
-    } else {
-      message.reply('You need to join a voice channel first!')
-    }
-  } else if (message.content === '!stop') {
-    message.member.voiceChannel.leave()
-  }
-})
-
-/* Search In the unreal docs
-*
-*/
-client.on('message', message => {
-  if (message.content === '!tet') {
-    var searchTerm = 'OnActorHit'
-    findInfiles.find(searchTerm, '.', '.chm').then(function(results) {
-      console.log('Tet acc')
-      for (var result in results) {
-        var res = results[result]
-        console.log(
-          'found "' +
-            res.matches[0] +
-            '" ' +
-            res.count +
-            ' times in "' +
-            result +
-            '"\n'
-        )
-        message.reply(res.lines[0])
-      }
-      message.delete(5000)
+/** General Bot Commands
+   * !join: joins the bot in users the channel
+   * !leave: leave channel
+   * !clean: the whole botchannel is cleared
+   */
+const joinMessage$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'join')
+)
+general.joinChannel(joinMessage$).subscribe(
+  message => {
+    message.delete().then(() => {
+      console.log('Bot has joined the channel.')
     })
-  }
-})
+  },
+  err => console.log('Bot failed to join channel: ', err)
+)
+
+const leaveMessage$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'leave')
+)
+general.leaveChannel(leaveMessage$).subscribe(
+  voiceChannel => {
+    voiceChannel.leave()
+    console.log('Bot has left the channel.')
+  },
+  err => console.log('Bot failed to leave the channel: ', err)
+)
+
+const clearChannel$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'clean')
+)
+general.clearChannel(clearChannel$, 'bottestchannel').subscribe(
+  messages => {
+    messages.deleteAll()
+    console.log('Bot is clearing the channel.')
+  },
+  err => console.log('Bot failed to clear channel: ', err)
+)
+
+/** Game Commands
+ * !ping: is replied with pong
+ */
+const pingMessage$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'ping')
+)
+games.pingpong(pingMessage$).subscribe(
+  message => {
+    message.delete(5000).then(() => {
+      console.log('Bot has sent pong.')
+    })
+  },
+  err => console.log('Game Error (pingpong): ', err)
+)
+
+/** Media Commands
+ * !youtube[SPACE]url: plays the requested song
+  */
+const media$ = clientMessage$.filter(message =>
+  message.content.startsWith(prefix + 'youtube')
+)
+media
+  .play(media$, client, media.playYT)
+  .subscribe(
+    () => console.log('Bot started playing song: .'),
+    err => console.log('Media Error: ', err)
+  )
 
 client.login(process.env.UNREAL_BOT_TOKEN)
