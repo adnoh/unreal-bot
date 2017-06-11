@@ -1,11 +1,17 @@
-exports.pingpong = function(pingMessage$) {
-  const pongMessage$ = pingMessage$
-    .switchMap(message => message.reply('pong'))
-    .share()
+const Rx = require('rxjs/Rx')
 
-  pongMessage$
-    .withLatestFrom(pingMessage$, (x, pingMessage) => pingMessage)
-    .merge(pongMessage$)
-    .switchMap(message => message.delete(5000))
-    .subscribe(null, err => console.log(err), null)
+exports.pingpong = pingMessage$ => {
+  try {
+    const pongMessage$ = pingMessage$
+      .switchMap(message =>
+        Rx.Observable
+          .fromPromise(message.reply('pong'))
+          .catch(() => Rx.Observable.empty())
+      )
+      .share()
+
+    return pingMessage$.merge(pongMessage$)
+  } catch (err) {
+    return Rx.Observable.throw(err)
+  }
 }

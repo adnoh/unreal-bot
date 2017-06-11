@@ -71,7 +71,13 @@ general
 const pingMessage$ = clientMessage$.filter(message =>
   message.content.startsWith(prefix + 'ping')
 )
-games.pingpong(pingMessage$).subscribe(null, err => console.log(err), null)
+games.pingpong(pingMessage$).subscribe(
+  message => {
+    message.delete(5000)
+  },
+  err => console.log(err),
+  null
+)
 
 /** Media Commands
  * !youtube[SPACE]url: plays the requested song
