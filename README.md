@@ -15,11 +15,11 @@ YOUTUBE_API_KEY="TokenYoutube"
 
 ## Command list
 1. General
-  - !join: joins the bot in users the channel
-  - !leave: leaves channel
-  - !clean: channel will be cleared from messages
+  - **!join**: joins the bot in users the channel
+  - **!leave**: leaves channel
+  - **!clean**: channel will be cleared from messages
 2. Games
-  - !ping: replies pong
+  - **!ping**: replies pong
 3. Media
-  -!youtube search term: Plays the audio of the first matching result 
-  -!youtube url: Plays the audio from the url
+  - **!youtube search term**: Plays the audio of the first matching result 
+  - **!youtube url**: Plays the audio from the url
